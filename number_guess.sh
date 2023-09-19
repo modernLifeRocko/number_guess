@@ -26,15 +26,31 @@ GET_USER (){
 }
 GUESS_GAME (){
   # Prompt for next guess
-  # compare guess to number
-    # if guess low
-      # prompt guess higher
-    # if guess high
-      #prompt guess lower
-    # if guess correct
-      #update records
-      #print win message 
-  echo $USER
+  if [[ ! -z $1 ]]
+  then
+    echo "$1"
+  fi
+  read GUESS
+  if [[ ! $GUESS =~ ^[0-9]+$ ]]
+  then
+    GUESS_GAME "That is not an integer, guess again:"
+  else
+    ((GUESS_COUNT+=1))
+  if [[ $GUESS -lt $NUMBER ]]
+  then
+    # prompt guess higher
+    GUESS_GAME "It's higher than that, guess again:"
+  elif [[ $GUESS -gt $NUMBER ]]
+  then
+    #prompt guess lower
+    GUESS_GAME "It's lower than that, guess again:"
+  else
+    #update records
+    UPDATE_RESULT=$($PSQL "INSERT INTO scores(user_id,score) VALUES($USER_ID, $GUESS_COUNT)")
+    #print win message
+    echo "You guessed it in $GUESS_COUNT tries. The secret number was $NUMBER. Nice job!"
+  fi
+  fi 
 }
 
 echo "Enter your username:"
